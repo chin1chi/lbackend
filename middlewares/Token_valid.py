@@ -1,4 +1,4 @@
-from fastapi import Request, HTTPException,Depends
+from fastapi import Request, HTTPException,Depends, Security
 from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Callable
 from starlette.responses import Response
@@ -35,4 +35,7 @@ def get_current_user_id(request: Request)-> int :
     if user_id is None:
         raise HTTPException(status_code=401, detail="User ID not found in request")
     return user_id
+
+
+
 

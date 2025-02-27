@@ -1,8 +1,6 @@
 import json
-
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from cache.redis.redis_requests import get_rating_cache, set_rating_cache
 from database.connection_to_db.database import get_async_session
 from database.request_to_db.database_requests import players_rating_all, players_rating_current_month, \
@@ -10,9 +8,9 @@ from database.request_to_db.database_requests import players_rating_all, players
 from schemas.error_schemas import InternalServerErrorResponse
 from schemas.rating_schemas import RatingResponse, PlayerRating
 from middlewares.Token_valid import get_current_user_id
-
+from fastapi.security import HTTPBearer
 router = APIRouter()
-
+security = HTTPBearer()
 
 async def top_100_rating_player(user_id, players, db):
     current_username = await get_username_by_user_id(user_id, db)
@@ -35,7 +33,7 @@ async def top_100_rating_player(user_id, players, db):
     return rating_players
 
 
-@router.post("/all")
+@router.post("/all",dependencies=[Depends(security)])
 async def get_all_rating(user_id:int=Depends(get_current_user_id), db: AsyncSession = Depends(get_async_session)):
     try:
         rating_cache = await get_rating_cache(user_id, "all")
@@ -54,7 +52,7 @@ async def get_all_rating(user_id:int=Depends(get_current_user_id), db: AsyncSess
                             detail=InternalServerErrorResponse.status_text)
 
 
-@router.post("/current_month")
+@router.post("/current_month",dependencies=[Depends(security)])
 async def get_rating_current_month(user_id:int=Depends(get_current_user_id), db: AsyncSession = Depends(get_async_session)):
     try:
         rating_cache = await get_rating_cache(user_id, "current_month")
@@ -74,7 +72,7 @@ async def get_rating_current_month(user_id:int=Depends(get_current_user_id), db:
                             detail=InternalServerErrorResponse.status_text)
 
 
-@router.post("/current_year")
+@router.post("/current_year",dependencies=[Depends(security)])
 async def get_rating_current_year(user_id:int=Depends(get_current_user_id), db: AsyncSession = Depends(get_async_session)):
     try:
         rating_cache = await get_rating_cache(user_id, "current_year")

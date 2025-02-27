@@ -1,6 +1,3 @@
-from typing import Annotated
-from urllib.request import Request
-
 from fastapi import APIRouter, HTTPException, Depends, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.connection_to_db.database import get_async_session

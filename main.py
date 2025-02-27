@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from auth.auth_routes import router as auth_router
 from events.get_events import router as get_events_router
@@ -8,8 +8,16 @@ from categoryes.get_categories import router as categories_router
 from rating.get_rating import router as rating_router
 from events.get_swipe_events import router as get_swipe_events_router
 from middlewares.Token_valid import TokenValidationMiddleware
+from fastapi.security import OAuth2PasswordBearer
+
 
 app = FastAPI()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+app.get("/secure-data")
+async def secure_data(token: str = Depends(oauth2_scheme)):
+    return {"message": "Secure data", "token": token}
+
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,3 +35,5 @@ app.include_router(get_complete_events_router,prefix="/history_events",tags=["hi
 app.include_router(rating_router, prefix="/rating", tags=["rating"])
 app.include_router(get_swipe_events_router, prefix="/events", tags=["events"])
 app.include_router(get_notifications_router, prefix="/notifications", tags=["notifications"])
+
+

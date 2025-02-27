@@ -1,9 +1,8 @@
 # events.py
 import json
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-
+import logging
 from cache.redis.redis_requests import get_ongoing_events_cache, set_ongoing_events_cache, get_details_event_cache, \
     set_details_event_cache
 from schemas import events_schemas
@@ -12,13 +11,17 @@ from database.request_to_db.database_requests import get_ongoing_events, get_eve
 from schemas.events_schemas import EventShortInfo
 from schemas.error_schemas import InternalServerErrorResponse, SuccessResponse
 from  middlewares.Token_valid import get_current_user_id
-from schemas.token_schemas import TokenRequest
 from schemas.error_schemas import InternalServerErrorResponse
+from fastapi.security import HTTPBearer
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
+security = HTTPBearer()
 
+@router.post("/events/ongoing", response_model=list[events_schemas.EventShortInfo],
+             dependencies=[Depends(security)])
 
-@router.post("/events/ongoing", response_model=list[events_schemas.EventShortInfo])
 async def get_ongoing_events_route(
     user_id = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_async_session)
@@ -48,12 +51,15 @@ async def get_ongoing_events_route(
         # Возвращаем результат
         return data
 
+
     except Exception as e:
-        raise HTTPException(status_code=InternalServerErrorResponse.status,
-                            detail=InternalServerErrorResponse.status_text)
 
+        logger.error(f"Error in get_ongoing_events_route: {e}", exc_info=True)
 
-@router.post("/events/details", response_model=events_schemas.EventDetailsResponce)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@router.post("/events/details", response_model=events_schemas.EventDetailsResponce,
+             dependencies=[Depends(security)])
 async def get_event_details_by_post(event_request: events_schemas.EventRequest,
                                     user_id = Depends(get_current_user_id),
                                     db: AsyncSession = Depends(get_async_session)):

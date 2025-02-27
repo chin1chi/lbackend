@@ -1,5 +1,4 @@
 import json
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from middlewares.Token_valid import get_current_user_id
@@ -8,11 +7,11 @@ from schemas.history_events_schemas import EventHistoryResponse, HistoryDateFrom
 from database.connection_to_db.database import get_async_session
 from database.request_to_db.database_requests import get_event_history_by_dates, get_player
 from schemas.error_schemas import InternalServerErrorResponse
-
+from fastapi.security import HTTPBearer
 router = APIRouter()
+security = HTTPBearer()
 
-
-@router.post("/events/history", response_model=list[EventHistoryResponse])
+@router.post("/events/history", response_model=list[EventHistoryResponse],dependencies=[Depends(security)])
 async def get_event_history_route(
     dtfrom: HistoryDateFrom,
     dtto: HistoryDateTo,

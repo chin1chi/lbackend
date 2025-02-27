@@ -1,19 +1,17 @@
 import json
-
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from cache.redis.redis_requests import get_categories_cache, set_categories_cache
 from database.connection_to_db.database import get_async_session
 from database.request_to_db.database_requests import get_player, get_all_categories, update_player_entertainment_tags
 from schemas.categories import EntertainmentRequest, LikeRequest, PlayerCategoriesResponse
 from schemas.error_schemas import InternalServerErrorResponse, SuccessResponse
 from middlewares.Token_valid import get_current_user_id
-
+from fastapi.security import HTTPBearer
 router = APIRouter()
+security = HTTPBearer()
 
-
-@router.post("/get_categories_and_player_likes", response_model=PlayerCategoriesResponse)
+@router.post("/get_categories_and_player_likes", response_model=PlayerCategoriesResponse,dependencies=[Depends(security)])
 async def get_categories_and_player_likes(user_id:int=Depends(get_current_user_id), db: AsyncSession = Depends(get_async_session)):
     try:
         categories_cache = await get_categories_cache(user_id)
@@ -39,7 +37,7 @@ async def get_categories_and_player_likes(user_id:int=Depends(get_current_user_i
                             detail=InternalServerErrorResponse.status_text)
 
 
-@router.post("/save_like_category", response_model=SuccessResponse)
+@router.post("/save_like_category", response_model=SuccessResponse,dependencies=[Depends(security)])
 async def player_save_like_category(category_request: EntertainmentRequest,
                                     like_request: LikeRequest,user_id:int=Depends(get_current_user_id) ,db: AsyncSession = Depends(get_async_session)):
     try:

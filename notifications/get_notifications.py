@@ -1,8 +1,6 @@
 import json
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from cache.redis.redis_requests import get_notifications_cache, set_notifications_cache
 from database.connection_to_db.database import get_async_session
 from database.request_to_db.database_requests import get_notifications, set_checked_notification_for_user
