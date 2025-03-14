@@ -13,6 +13,12 @@ def create_jwt_token(user_id: int) -> str:
     token_data = {"sub": str(user_id), "exp": expiration}
     return jwt.encode(token_data, settings.AUTH_SECRET_KEY, algorithm="HS256")
 
+def create_refresh_token(user_id: int) -> str:
+    expiration = datetime.utcnow() + timedelta(weeks=4)  # Например, 4 недели для рефреш-токена
+    token_data = {"sub": str(user_id), "exp": expiration}
+    return jwt.encode(token_data, settings.AUTH_SECRET_KEY, algorithm="HS256")
+
+
 def decode_jwt_token(token: str):
     try:
         payload = jwt.decode(token, settings.AUTH_SECRET_KEY, algorithms=["HS256"])

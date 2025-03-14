@@ -12,15 +12,14 @@ from schemas.events_schemas import EventShortInfo
 from schemas.error_schemas import InternalServerErrorResponse, SuccessResponse
 from  middlewares.Token_valid import get_current_user_id
 from schemas.error_schemas import InternalServerErrorResponse
-from fastapi.security import HTTPBearer
+
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-security = HTTPBearer()
 
-@router.post("/events/ongoing", response_model=list[events_schemas.EventShortInfo],
-             dependencies=[Depends(security)])
+
+@router.post("/events/ongoing", response_model=list[events_schemas.EventShortInfo])
 
 async def get_ongoing_events_route(
     user_id = Depends(get_current_user_id),
@@ -58,8 +57,7 @@ async def get_ongoing_events_route(
 
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@router.post("/events/details", response_model=events_schemas.EventDetailsResponce,
-             dependencies=[Depends(security)])
+@router.post("/events/details", response_model=events_schemas.EventDetailsResponce)
 async def get_event_details_by_post(event_request: events_schemas.EventRequest,
                                     user_id = Depends(get_current_user_id),
                                     db: AsyncSession = Depends(get_async_session)):

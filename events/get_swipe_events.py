@@ -10,12 +10,12 @@ from middlewares.Token_valid import get_current_user_id
 from schemas.error_schemas import InternalServerErrorResponse, SuccessResponse
 from schemas.events_schemas import CountEventsRequest, EventResponse, EventInfo, EventIdRequest
 from schemas.swipe_events_schemas import LikeSwipeEventRequest, IsLikeSwipeEventsRequest
-from fastapi.security import HTTPBearer
+
 
 router = APIRouter()
-security = HTTPBearer()
 
-@router.post("/get_events",dependencies=[Depends(security)])
+
+@router.post("/get_events")
 async def get_events_for_player(
         count_events: CountEventsRequest,
         user_id = Depends(get_current_user_id),
@@ -40,7 +40,7 @@ async def get_events_for_player(
                             detail=InternalServerErrorResponse.status_text)
 
 
-@router.post("/get_swipe_events",dependencies=[Depends(security)])
+@router.post("/get_swipe_events")
 async def get_swipe_events_for_player( is_like_swipe_events: IsLikeSwipeEventsRequest,
                                        user_id = Depends(get_current_user_id),
                                       db: AsyncSession = Depends(get_async_session)):
@@ -64,7 +64,7 @@ async def get_swipe_events_for_player( is_like_swipe_events: IsLikeSwipeEventsRe
                             detail=InternalServerErrorResponse.status_text)
 
 
-@router.post("/swipe_event", response_model=SuccessResponse,dependencies=[Depends(security)])
+@router.post("/swipe_event", response_model=SuccessResponse)
 async def player_swipe_event_add_or_update(event_id_request: EventIdRequest,
                                            is_like_event_request: LikeSwipeEventRequest,
                                            user_id = Depends(get_current_user_id),
